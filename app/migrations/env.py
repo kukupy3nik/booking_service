@@ -8,8 +8,7 @@ from alembic import context
 
 from app.config import settings
 from app.database import Base
-from app.hotels.models import Hotel
-from app.rooms.models import Room
+from app.hotels.models import Hotel, Room
 from app.bookings.models import Booking
 from app.users.models import User
 
