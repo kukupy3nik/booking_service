@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, JSON, Date, ForeignKey, Computed
 from app.database import Base
 
 
-class Booking(Base):
+class Bookings(Base):
     __tablename__ = 'booking'
     id = Column(Integer, primary_key=True)
     room_id = Column(ForeignKey('room.id'), nullable=False)

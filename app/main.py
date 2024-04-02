@@ -4,13 +4,12 @@ from typing import Optional
 from fastapi import FastAPI, Query, Depends
 from pydantic import BaseModel, Field
 
+from app.bookings.router import router as router_bookings
+
 
 app = FastAPI()
+app.include_router(router_bookings)
 
-class SHotel(BaseModel):
-    adress: str
-    name: str
-    stars: int = Field(None, ge=1, le=5)
 
 class HotelsSearchArgs:
     def __init__(self,
@@ -24,18 +23,29 @@ class HotelsSearchArgs:
         self.date_to = date_to
         self.has_spa = has_spa
         self.stars = stars
+
+
+class SHotel(BaseModel):
+    address: str
+    name: str
+    stars: int = Field(None, ge=1, le=5)
+
+
 @app.get("/hotels")
 def get_hotels(search_args: HotelsSearchArgs = Depends()) -> list[SHotel]:
     return search_args
+
 
 class SBooking(BaseModel):
     room_id: int
     date_from: date
     date_to: date
 
+
 @app.post("/bookings")
 def add_booking(booking: SBooking):
     return
+
 
 if __name__ == '__main__':
     import uvicorn
