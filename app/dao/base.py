@@ -12,19 +12,18 @@ class BaseDAO:
         async with async_session_maker() as session:
             query = select(cls.model).where(cls.model.id == model_id)
             result: ChunkedIteratorResult = await session.execute(query)
-            return result.mappings().one_or_none()
+            return result.scalars().one_or_none()
 
     @classmethod
     async def find_one_or_none(cls, **filter_by):
         async with async_session_maker() as session:
             query = select(cls.model).filter_by(**filter_by)
             result: ChunkedIteratorResult = await session.execute(query)
-            return result.mappings().one_or_none()
-
+            return result.scalars().one_or_none()
 
     @classmethod
     async def find_all(cls, **filter_by):
         async with async_session_maker() as session:
             query = select(cls.model).filter_by(**filter_by)
             result: ChunkedIteratorResult = await session.execute(query)
-            return result.mappings().all()
+            return result.scalars().all()

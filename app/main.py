@@ -33,20 +33,11 @@ class SHotel(BaseModel):
 
 @app.get("/hotels")
 def get_hotels(search_args: HotelsSearchArgs = Depends()) -> list[SHotel]:
-    return search_args
+    return [SHotel(address='Aa st.', name='Hotel C', stars=5), SHotel(address='Bb st.', name='Hotel D', stars=5)]
 
 
-class SBooking(BaseModel):
-    room_id: int
-    date_from: date
-    date_to: date
-
-
-@app.post("/bookings")
-def add_booking(booking: SBooking):
-    return
 
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run('app.main:app', host="127.0.0.1", port=8000, reload=True)
