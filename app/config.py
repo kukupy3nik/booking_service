@@ -14,9 +14,13 @@ class Settings(BaseSettings):
     def get_database_url(self):
         self.DATABASE_URL = f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
         return self
+
+    SECRET_KEY: str
+    ALGORITHM: str
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
 
-settings = Settings()
 
+settings = Settings()
