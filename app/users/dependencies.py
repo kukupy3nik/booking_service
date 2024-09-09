@@ -12,7 +12,7 @@ from app.users.models import Users
 def get_token(request: Request):
     token = request.cookies.get('bookings_access_token')
     if not token:
-        raise HTTPException(status_code=401, detail='Not authenticated')
+        raise TokenAbsentException
     return token
 
 
