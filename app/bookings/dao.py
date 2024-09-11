@@ -5,7 +5,7 @@ from sqlalchemy.sql.selectable import Select
 
 from app.database import async_session_maker, engine
 from app.bookings.models import Bookings
-from app.hotels.models import Rooms
+from app.hotels.rooms.models import Rooms
 from app.users.models import Users
 from app.dao.base import BaseDAO
 
