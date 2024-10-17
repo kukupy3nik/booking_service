@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import select, and_, or_, func
+from sqlalchemy import select, and_, func, case
 
 from app.bookings.models import Bookings
 from app.dao.base import BaseDAO
@@ -16,23 +16,26 @@ class HotelDAO(BaseDAO):
     @classmethod
     async def find_all_available(cls, location: str, date_from: date, date_to: date) -> [SGetHotelsResponse]:
         async with (async_session_maker() as session):
+            booked_rooms = select(Bookings.room_id, (Rooms.quantity - func.count(Bookings.room_id)).label(
+                'rooms_left')).select_from(Bookings).join(Rooms, Rooms.id == Bookings.room_id).where(
+                and_(Bookings.date_from < date_to, Bookings.date_to > date_from)).group_by(
+                Bookings.room_id, Rooms.quantity).cte('booked_rooms')
+
             avlbl_rooms = select(
-                Hotels.id, Hotels.name, Hotels.location, Hotels.services, Hotels.rooms_quantity, Hotels.image_id,
-                (Rooms.quantity - func.count(Bookings.room_id)).label('rooms_left')).select_from(Hotels).join(
-                Rooms, Rooms.hotel_id == Hotels.id).join(Bookings, Bookings.room_id == Rooms.id, isouter=True).where(
-                and_(Hotels.location.like(f'%{location}%'),
-                     or_(
-                         and_(Bookings.date_from >= date_from, Bookings.date_from <= date_to),
-                         and_(Bookings.date_from <= date_from, Bookings.date_to > date_from),
-                         Bookings.date_from.is_(None)
-                     ))).group_by(
-                Hotels.id, Rooms.quantity).having(Rooms.quantity - func.count(Bookings.room_id) > 0).cte(
-                'available_hotel_rooms')
+                Hotels.id,
+                Hotels.name,
+                Hotels.location,
+                Hotels.services,
+                func.sum(Rooms.quantity).label('rooms_quantity'),
+                Hotels.image_id, func.sum(case((
+                    booked_rooms.c.rooms_left == None, Rooms.quantity), else_=booked_rooms.c.rooms_left)).label('rooms_left')
+            ).select_from(Hotels
+                  ).join(Rooms, Rooms.hotel_id == Hotels.id
+                         ).join(booked_rooms, booked_rooms.c.room_id == Rooms.id, isouter=True
+            ).where(Hotels.location.like(f'%{location}%')
+            ).group_by(Hotels.id
+            ).having(func.sum(case((
+                    booked_rooms.c.rooms_left == None, Rooms.quantity), else_=booked_rooms.c.rooms_left)) > 0)
 
-            query = select(avlbl_rooms).select_from(avlbl_rooms)
-            print(avlbl_rooms.compile(engine, compile_kwargs={"literal_binds": True}))
-            result = await session.execute(query)
-            result_list = result.fetchall()
-            print(result_list)
-
-            return result_list
+            result = await session.execute(avlbl_rooms)
+            return result.fetchall()

@@ -17,9 +17,9 @@ async def get_hotels(location: str, date_from: date, date_to: date):  # -> list[
         for h in hotels]
 
 
-@router.get('/{hotel_id}/rooms')
-def get_rooms(hotel_id: str, date_from: date, date_to: date) -> list[SGetRoomsResponse]:
-    ...
+# @router.get('/{hotel_id}/rooms')
+# def get_rooms(hotel_id: str, date_from: date, date_to: date) -> list[SGetRoomsResponse]:
+#     ...
 
 
 
